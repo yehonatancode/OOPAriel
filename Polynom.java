@@ -1,8 +1,13 @@
 package myMath;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Predicate;
+
+import org.knowm.xchart.QuickChart;
+import org.knowm.xchart.SwingWrapper;
+import org.knowm.xchart.XYChart;
 
 import myMath.Monom;
 /**
@@ -32,7 +37,7 @@ public class Polynom implements Polynom_able{
 	}
 	
 	public Polynom(){
-		power = new ArrayList<Monom>(); //τεμιπεν δΰτρ
+		power = new ArrayList<Monom>(); //Χ¤Χ•ΧΧ™Χ Χ•Χ Χ”ΧΧ¤Χ΅
 	}
 	
 	@Override
@@ -185,14 +190,75 @@ public boolean isZero() {
 }
 
 @Override
-public Polynom_able copy() {
-	Polynom pa = new Polynom();
+public Polynom copy() {
+	Polynom_able pa = new Polynom();
 	for(int i=0; i<this.power.size();i++){
-		pa.add(this.power.get(i));
+		pa.add(new Monom(this.power.get(i).get_coefficient(),this.power.get(i).get_power()));
 	}
-	return pa;
+	return (Polynom) pa;
 }
-
+public void Init(){
+	power = new ArrayList<Monom>();
+}
+public void Init(String s){
+	String _temp = s;
+	String [] _arraytemp = _temp.split("(?=\\+|\\-)");
+	int i = 1;
+	String []b = _arraytemp[0].split("X\\^");
+	if (b.length!=2)
+		b = _arraytemp[0].split("x\\^");
+	double coeff = Double.parseDouble(b[0]);
+	int power = Integer.parseInt(b[1]);
+	Monom m = new Monom(coeff,power);
+	this.power.add(m);
+	while (i<_arraytemp.length){
+		b = _arraytemp[i].split("X\\^");
+		if (b.length!=2)
+			b = _arraytemp[i].split("x\\^");
+		if (b.length==2) {
+			coeff = Double.parseDouble(b[0]);
+			power = Integer.parseInt(b[1]);
+		}
+		else {
+			coeff = Double.parseDouble(b[0]);
+			power = 0;
+		}
+		m = new Monom(coeff,power);
+		this.power.add(m);
+		i++;		
+	}
+	this.isZero();
+	Collections.sort(this.power , new Monom_Comperator());
+}
+public String toString(){
+	String s = "";
+	Iterator<Monom> a = iteretor();
+	while (a.hasNext()){
+		Monom m = new Monom(a.next());
+		s = s + m.get_coefficient() + "X^" + m.get_power()+"+";
+	}
+	s = s.replace( "+-", "-");
+	s = s.replace( "X^0", "");
+	s = s.substring(0, s.length()-1);
+	return s+"" ;
+}
+public void GraphicPolynom() {
+	ArrayList<Double> xData = new ArrayList<Double>();
+	ArrayList<Double> yData = new ArrayList<Double>();
+	for (double i = -2; i < 2; i+=0.1) {
+		xData.add(i);
+		yData.add(this.f(i));
+	}
+	System.out.println(xData.toString());
+	System.out.println(yData.toString());
+	XYChart chart = QuickChart.getChart("sample", "X" , "Y" , "y(x)" , xData, yData);
+	new SwingWrapper<XYChart>(chart).displayChart();
+	
+}
+public void graphPlot(double x0, double x1) {
+	LinePlotTest frame = new LinePlotTest(this ,x0 ,x1 );
+	frame.setVisible(true);
+}
 
 	
 }
